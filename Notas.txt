@@ -1,0 +1,1 @@
+Para este proyecto se usó css puro para dar estilos a los componentes
