@@ -1,91 +1,89 @@
-import { useState, useEffect } from 'react'
-import Header from './components/Header'
-import Filtros from './components/Filtros'
-import ListadoGastos from './components/ListadoGastos'
-import Modal from './components/Modal'
-import { generarId } from './helpers/index.js'
-import IconoNuevoGasto from './img/nuevo-gasto.svg'
+import { useState, useEffect } from 'react';
+import Header from './components/Header';
+import Filtros from './components/Filtros';
+import ListadoGastos from './components/ListadoGastos';
+import Modal from './components/Modal';
+import { generarId } from './helpers/index.js';
+import IconoNuevoGasto from './img/nuevo-gasto.svg';
 
 function App() {
-
   const [presupuesto, setPresupuesto] = useState(
     Number(localStorage.getItem('presupuesto', 0))
-  )
-  const [isValidPresupuesto, setIsValidPresupuesto] = useState(false)
-  const [modal, setModal] = useState(false)
-  const [animarModal, setAnimarModal] = useState(false)
+  );
+  const [isValidPresupuesto, setIsValidPresupuesto] = useState(false);
+  const [modal, setModal] = useState(false);
+  const [animarModal, setAnimarModal] = useState(false);
   const [gastos, setGastos] = useState(
-    localStorage.getItem('gastos') ? JSON.parse(localStorage.getItem('gastos')) : []
-  )
-  const [gastoEditar, setGastoEditar] = useState({})
-  const [filtro, setFiltro] = useState('')
-  const [gastosFiltrados, setGastosFiltrados] = useState([])
+    localStorage.getItem('gastos')
+      ? JSON.parse(localStorage.getItem('gastos'))
+      : []
+  );
+  const [gastoEditar, setGastoEditar] = useState({});
+  const [filtro, setFiltro] = useState('');
+  const [gastosFiltrados, setGastosFiltrados] = useState([]);
 
   const handleNuevoGasto = () => {
-    setModal(true)
-    setGastoEditar({})
-    
-    setTimeout( () => {
-      setAnimarModal(true)
-    }, 500)
+    setModal(true);
+    setGastoEditar({});
 
-  }
+    setTimeout(() => {
+      setAnimarModal(true);
+    }, 500);
+  };
 
-  const guardarGasto = gasto => {
-
+  const guardarGasto = (gasto) => {
     if (gasto.id) {
       // Actualizar Gasto
-      const gastosActualizados = gastos.map(
-        gastoState => gastoState.id === gasto.id ? gasto : gastoState )
-        setGastos(gastosActualizados)
-        setGastoEditar({})
-    }else {
+      const gastosActualizados = gastos.map((gastoState) =>
+        gastoState.id === gasto.id ? gasto : gastoState
+      );
+      setGastos(gastosActualizados);
+      setGastoEditar({});
+    } else {
       // Nuevo Gasto
-          gasto.id = generarId()
-          gasto.fecha = Date.now()
-          setGastos([gasto, ...gastos])
+      gasto.id = generarId();
+      gasto.fecha = Date.now();
+      setGastos([gasto, ...gastos]);
     }
-
-  }
+  };
 
   useEffect(() => {
-    if (Object.keys(gastoEditar).length > 0){
-      setModal(true)
-      
-      setTimeout( () => {
-        setAnimarModal(true)
-      }, 500)
-  
-    } 
-  }, [gastoEditar])
+    if (Object.keys(gastoEditar).length > 0) {
+      setModal(true);
 
-  useEffect( () => {
-    localStorage.setItem('presupuesto', presupuesto ?? 0)
-  }, [presupuesto] )
+      setTimeout(() => {
+        setAnimarModal(true);
+      }, 500);
+    }
+  }, [gastoEditar]);
 
-  useEffect( () => {
-    const presupuestoLS = Number(localStorage.getItem('presupuesto', 0))
+  useEffect(() => {
+    localStorage.setItem('presupuesto', presupuesto ?? 0);
+  }, [presupuesto]);
+
+  useEffect(() => {
+    const presupuestoLS = Number(localStorage.getItem('presupuesto', 0));
     if (presupuestoLS > 0) {
-      setIsValidPresupuesto(true)
+      setIsValidPresupuesto(true);
     }
+  }, []);
 
-  }, [])
+  useEffect(() => {
+    localStorage.setItem('gastos', JSON.stringify(gastos) ?? []);
+  }, [gastos]);
 
-  useEffect( () => {
-    localStorage.setItem('gastos', JSON.stringify(gastos) ?? [])
-  }, [gastos])
-
-  useEffect( () => {
+  useEffect(() => {
     if (filtro) {
-      const gastosFiltradosOBJ = gastos.filter( gasto => gasto.categoria === filtro)
-      setGastosFiltrados(gastosFiltradosOBJ)
+      const gastosFiltradosOBJ = gastos.filter(
+        (gasto) => gasto.categoria === filtro
+      );
+      setGastosFiltrados(gastosFiltradosOBJ);
     }
-  }, [filtro])
-  
-  return (
+  }, [filtro]);
 
-    <div className={modal ? 'fijar': ''}>
-      <Header 
+  return (
+    <div className={modal ? 'fijar' : ''}>
+      <Header
         presupuesto={presupuesto}
         setPresupuesto={setPresupuesto}
         isValidPresupuesto={isValidPresupuesto}
@@ -94,37 +92,32 @@ function App() {
         setGastos={setGastos}
       />
 
-      {
-        isValidPresupuesto && (
-          <>
-            <main>
+      {isValidPresupuesto && (
+        <>
+          <main>
+            <Filtros filtro={filtro} setFiltro={setFiltro} />
 
-              <Filtros
-                filtro={filtro}
-                setFiltro={setFiltro}
-              />
+            <ListadoGastos
+              gastos={gastos}
+              setGastoEditar={setGastoEditar}
+              setGastos={setGastos}
+              filtro={filtro}
+              gastosFiltrados={gastosFiltrados}
+            />
+          </main>
+          <div className='nuevo-gasto'>
+            <img
+              src={IconoNuevoGasto}
+              alt='nuevo-gasto'
+              onClick={handleNuevoGasto}
+            />
+          </div>
+        </>
+      )}
 
-              <ListadoGastos 
-                gastos={gastos}
-                setGastoEditar={setGastoEditar}
-                setGastos={setGastos}
-                filtro={filtro}
-                gastosFiltrados={gastosFiltrados}
-                
-              />
-            </main>
-            <div className='nuevo-gasto'>
-              <img src={IconoNuevoGasto} alt="nuevo-gasto" 
-                onClick={handleNuevoGasto}/>
-            </div>
-          </>
-        )
-      }
-
-      {
-        modal && 
-        <Modal 
-          setModal={setModal} 
+      {modal && (
+        <Modal
+          setModal={setModal}
           animarModal={animarModal}
           setAnimarModal={setAnimarModal}
           guardarGasto={guardarGasto}
@@ -132,11 +125,9 @@ function App() {
           gastoEditar={gastoEditar}
           setGastoEditar={setGastoEditar}
         />
-      }
-
+      )}
     </div>
-    
-  )
+  );
 }
 
-export default App
+export default App;
